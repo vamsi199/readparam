@@ -1,47 +1,63 @@
 package main
 
 import (
-	"net/http"
 	"github.com/gorilla/mux"
-	"log"
+	"net/http"
+	// "log"
 	"encoding/json"
 
-
+	"fmt"
 )
 
-
-
 type dogs struct {
-	ID string `json:"id"`
+	ID    string `json:"id"`
 	Color string `json:"color"`
+	Breed string `json:"breed"`
 }
 
-func readparameter(w http.ResponseWriter,req *http.Request)  {
+func readparameter(w http.ResponseWriter, req *http.Request) {
 	var dog dogs
 	parameter := mux.Vars(req)
 	dog.ID = parameter["id"]
 	json.NewEncoder(w).Encode(dog.ID)
 }
-func Qweryread(w http.ResponseWriter,req *http.Request){
+func Readmultiplequeryparameters(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("Hello", req.URL.RawQuery)
 	var dog dogs
 	f := req.URL.Query()
-	dog.Color = f.Get("color")
-	json.NewEncoder(w).Encode(dog.Color)
+	dog.Color = f["color"][0]
+	dog.Breed = f["breed"][0]
+	fmt.Fprintln(w, "breed=", dog.Breed)
+	fmt.Fprintln(w, "color=", dog.Color)
+
+}
+func Storedatafrombody(w http.ResponseWriter, r *http.Request) {
+	var dog dogs
+	f := r.Body
+	json.NewDecoder(f).Decode(&dog)
+	fmt.Fprintln(w, "breed=", dog.Breed)
+	fmt.Fprintln(w, "color=", dog.Color)
+}
+func Readfromheader(w http.ResponseWriter, r *http.Request) {
+
+	byte, err := json.Marshal(r.Header.Get("Breed")) // <-------- here !
+
+	if err != nil {
+		return
+	}
+
+	fmt.Println(string(byte))
 
 }
 
-
-
-
-
 func main() {
-	router := mux.NewRouter()
-	router.HandleFunc("/dogs/{id}",readparameter).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8081",router))
-	http.HandleFunc("/breed",Qweryread)
-	http.ListenAndServe(":8082",nil)
-
-
-
+	fmt.Println("welcome")
+	//router := mux.NewRouter()
+	//router.HandleFunc("/dogs/{id}",readparameter).Methods("GET")
+	//log.Fatal(http.ListenAndServe(":8081",router))
+	http.HandleFunc("/dog", Readmultiplequeryparameters) //read query parameters with multiple values
+	http.HandleFunc("/dogwrite", Storedatafrombody) //read the data from body (json data) and store it in a structure variables
+	http.HandleFunc("/dogheader", Readfromheader) //read value in a header and print it.
+	http.ListenAndServe(":8086", nil)
 
 }
