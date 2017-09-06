@@ -1,4 +1,4 @@
-package main
+package init
 
 import (
 	"github.com/gorilla/mux"
@@ -48,7 +48,7 @@ func Readfromheader(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "color=", dog.Color)
 }
 
-func main() {
+func init() {
 	fmt.Println("welcome")
 	//router := mux.NewRouter()
 	//router.HandleFunc("/dogs/{id}",readparameter).Methods("GET")
@@ -56,6 +56,6 @@ func main() {
 	http.HandleFunc("/dog", Readmultiplequeryparameters) //read query parameters with multiple values
 	http.HandleFunc("/dogwrite", Storedatafrombody) //read the data from body (json data) and store it in a structure variables
 	http.HandleFunc("/dogheader", Readfromheader) //read value in a header and print it.
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8087", nil)
 
 }
